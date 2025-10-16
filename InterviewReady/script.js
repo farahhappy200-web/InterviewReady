@@ -62,10 +62,18 @@ function validateForm({ major, position, jobLink, resumeFile }) {
 
 async function extractTextFromFile(file) {
   if (!file) return '';
-  // Minimal client-only approach: attempt to read text for doc/pdf; not perfect.
-  // For PDFs/DOCX, many browsers return empty text; a production app would use a WASM parser.
-  const text = await file.text().catch(() => '');
-  return text.slice(0, 20000); // limit
+  // Safari fallback: use FileReader if Blob.text isn't supported/reliable
+  const supportsBlobText = typeof Blob !== 'undefined' && Blob.prototype && typeof Blob.prototype.text === 'function';
+  if (supportsBlobText) {
+    try { return (await file.text()).slice(0, 20000); } catch {}
+  }
+  const readAsText = (blob) => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).slice(0, 20000));
+    reader.onerror = () => resolve('');
+    try { reader.readAsText(blob); } catch { resolve(''); }
+  });
+  return await readAsText(file);
 }
 
 function deriveFocusAreas(major, position, jobDescriptionText) {
@@ -216,9 +224,12 @@ async function handleSubmit(event) {
   // Optional fetch of job description text if URL is same-origin; otherwise skip.
   let jobDescriptionText = '';
   try {
-    if (jobLink && new URL(jobLink).origin === location.origin) {
-      const resp = await fetch(jobLink);
-      if (resp.ok) jobDescriptionText = await resp.text();
+    if (jobLink) {
+      const parsed = new URL(jobLink);
+      if (parsed.origin === location.origin) {
+        const resp = await fetch(parsed.toString());
+        if (resp.ok) jobDescriptionText = await resp.text();
+      }
     }
   } catch {}
 
