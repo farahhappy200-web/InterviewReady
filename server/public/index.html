@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>InterviewReady</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#121933; --text:#e6ebff; --muted:#a8b0d8; --accent:#6ea8fe; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: linear-gradient(180deg, #0b1020, #060913); color: var(--text); }
+    header { position: sticky; top:0; background: rgba(6,9,19,0.7); backdrop-filter: blur(8px); border-bottom: 1px solid #1f2a4d; padding: 14px 20px; font-weight: 700; letter-spacing: 0.3px; }
+    main { max-width: 860px; margin: 20px auto; padding: 0 16px 24px; }
+    #chat { display:flex; flex-direction:column; gap:14px; padding: 16px; background: var(--panel); border: 1px solid #1f2a4d; border-radius: 12px; min-height: 52vh; }
+    .msg { display:flex; gap:12px; align-items:flex-start; line-height: 1.55; }
+    .msg .role { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; min-width: 92px; padding-top: 6px; }
+    .msg .bubble { background: #0e1533; border: 1px solid #1f2a4d; padding: 12px 14px; border-radius: 10px; white-space: pre-wrap; }
+    .msg.user .bubble { background: #0b1a3d; border-color: #223969; }
+    form { margin-top: 18px; display:flex; flex-direction:column; gap:10px; }
+    textarea { width: 100%; padding: 12px 14px; background: #0c1330; color: var(--text); border: 1px solid #1f2a4d; border-radius: 10px; resize: vertical; min-height: 72px; }
+    .actions { display:flex; gap: 10px; justify-content: flex-end; }
+    button { background: var(--accent); color: #0b1020; font-weight: 700; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); border: 1px solid #2a3a6a; }
+    footer { text-align:center; color: var(--muted); font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>InterviewReady</header>
+  <main>
+    <div id="chat"></div>
+    <form id="form">
+      <textarea id="input" placeholder="Type your answer, or ask for a question…"></textarea>
+      <div class="actions">
+        <button type="button" class="secondary" id="ask">New question</button>
+        <button type="submit">Send</button>
+      </div>
+    </form>
+    <footer>InterviewReady — your AI interview coach</footer>
+  </main>
+  <script>
+    const chatEl = document.getElementById('chat');
+    const inputEl = document.getElementById('input');
+    const formEl = document.getElementById('form');
+    const askBtn = document.getElementById('ask');
+
+    const history = [];
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>\"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+    }
+
+    function addMessage(role, content) {
+      history.push({ role, content });
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.innerHTML = `<div class="role">${role}</div><div class="bubble">${escapeHtml(content)}</div>`;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    async function send(text) {
+      addMessage('user', text);
+      inputEl.value = '';
+
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history })
+      });
+      const data = await res.json();
+      addMessage('assistant', data.reply || '(no reply)');
+    }
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = inputEl.value.trim();
+      if (!text) return;
+      await send(text);
+    });
+
+    askBtn.addEventListener('click', async () => {
+      await send('Ask me an interview question.');
+    });
+
+    addMessage('assistant', 'Welcome to InterviewReady! Ask for a question or share an answer to get feedback.');
+  </script>
+</body>
+</html>
