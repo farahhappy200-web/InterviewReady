@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InterviewReady – Undergraduate Interview Coach</title>
+    <meta name="description" content="InterviewReady helps undergraduates prepare for internship interviews with tailored guidance." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header" role="banner">
+      <div class="container header-inner">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">IR</div>
+          <h1 class="app-title">InterviewReady</h1>
+        </div>
+        <p class="subtitle">Your personal coach for internship interviews</p>
+      </div>
+    </header>
+
+    <main class="container" role="main">
+      <section class="card" aria-labelledby="intake-title">
+        <h2 id="intake-title">Tell us about your goal</h2>
+        <form id="intake-form" novalidate>
+          <div class="field">
+            <label for="major">Major<span aria-hidden="true">*</span></label>
+            <input type="text" id="major" name="major" placeholder="e.g., Computer Science" required />
+            <div class="error" id="major-error" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="field">
+            <label for="position">Internship position/title<span aria-hidden="true">*</span></label>
+            <input type="text" id="position" name="position" placeholder="e.g., Software Engineering Intern" required />
+            <div class="error" id="position-error" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="field">
+            <label for="resume">Upload resume (PDF/DOCX, optional)</label>
+            <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" />
+            <div class="help">Your file stays in your browser and is not uploaded.</div>
+            <div class="error" id="resume-error" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="field">
+            <label for="jobLink">Job posting link (optional)</label>
+            <input type="url" id="jobLink" name="jobLink" placeholder="https://company.com/careers/..." inputmode="url" />
+            <div class="error" id="jobLink-error" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn primary">Get my coaching plan</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="results" class="card results hidden" aria-live="polite" aria-busy="false">
+        <h2>Personalized coaching plan</h2>
+        <div id="plan"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <div class="container">
+        <p>© <span id="year"></span> InterviewReady</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
